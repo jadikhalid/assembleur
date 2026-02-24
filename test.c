@@ -1,35 +1,23 @@
 #include <stdio.h>
 
-static unsigned char byte_bit_count[256]; /* tableau de recherche */
-
-void initialize_count_bits()
+int count_bits(unsigned int x)
 {
-    int cnt, i, data;
+    static unsigned int mask[] = {0x55555555,
+                                  0x33333333,
+                                  0x0F0F0F0F,
+                                  0x00FF00FF,
+                                  0x0000FFFF};
+    int i;
+    int shift;
+    /* nombre de positionà é dcalerà droite */
 
-    for (i = 0; i < 256; i++)
-    {
-        cnt = 0;
-        data = i;
-        while (data != 0)
-        { /* methode une */
-            data = data & (data - 1);
-            cnt++;
-        }
-        byte_bit_count[i] = cnt;
-    }
-}
-
-int count_bits(unsigned int data)
-{
-    const unsigned char *byte = (unsigned char *)&data;
-
-    return byte_bit_count[byte[0]] + byte_bit_count[byte[1]] +
-           byte_bit_count[byte[2]] + byte_bit_count[byte[3]];
+    for (i = 0, shift = 1; i < 5; i++, shift *= 2)
+        x = (x & mask[i]) + ((x >> shift) & mask[i]);
+    return x;
 }
 int main(void)
 {
-    initialize_count_bits();
-    unsigned int data = 22;
+    unsigned int data = 255;
     int result = count_bits(data);
     printf("Nombre de bit : %d\n", result);
 
